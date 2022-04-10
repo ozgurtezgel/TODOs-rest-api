@@ -69,7 +69,4 @@ public class UserController {
         LOGGER.info("GET " + BASE_URL + "/{}/{}/todo", userId, id);
         return userService.getTODO(userId, id);
     }
-
-
-
 }
