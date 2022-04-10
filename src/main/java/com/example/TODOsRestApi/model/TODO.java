@@ -21,8 +21,6 @@ public class TODO {
     @Pattern(regexp = "(completed|pending)", message = "Invalid input for status")
     private String status;
 
-
-
     @Override
     public String toString() {
         return "TODO{" +
