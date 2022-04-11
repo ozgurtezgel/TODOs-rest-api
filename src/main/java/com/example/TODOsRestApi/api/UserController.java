@@ -27,26 +27,26 @@ public class UserController {
 
     @PostMapping(path = "register")
     @ResponseStatus(HttpStatus.CREATED)
-    public User registerUser(@Valid @RequestBody User user) {
+    public User registerUser(@Valid @RequestBody User user, @RequestHeader(value = "Authorization", required = false) String accessToken) {
         LOGGER.info("POST " + BASE_URL + "/register");
         System.out.println(user);
-        return userService.registerUser(user);
+        return userService.registerUser(user, accessToken);
     }
 
     @DeleteMapping(path = "{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUserById(@PathVariable("id") Long id) {
+    public void deleteUserById(@PathVariable("id") Long id, @RequestHeader(value = "Authorization", required = false) String accessToken) {
         LOGGER.info("DELETE " + BASE_URL + "/{}", id);
-        userService.deleteUserById(id);
+        userService.deleteUserById(id, accessToken);
     }
 
     @PostMapping(path = "{userId}/todos")
     @ResponseStatus(HttpStatus.CREATED)
-    public TODO createTODO(@Valid @RequestBody TODO todo, @PathVariable("userId") Long userId) {
+    public TODO createTODO(@Valid @RequestBody TODO todo, @PathVariable("userId") Long userId, @RequestHeader(value = "Authorization", required = false) String accessToken) {
         LOGGER.info("POST " + BASE_URL + "/{}/todos", userId);
         todo.setUserId(userId);
         System.out.println(todo);
-        return userService.createTODO(todo);
+        return userService.createTODO(todo, accessToken);
     }
 
     @GetMapping(path = "{id}/todos")

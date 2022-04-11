@@ -20,19 +20,19 @@ public class UserService {
         this.userRestClient = userRestClient;
     }
 
-    public User registerUser(User user) {
+    public User registerUser(User user, String accessToken) {
         LOGGER.info("Register one user {}", user);
-        return userRestClient.registerUser(user);
+        return userRestClient.registerUser(user, accessToken);
     }
 
-    public void deleteUserById(Long id) {
+    public void deleteUserById(Long id, String accessToken) {
         LOGGER.info("Delete the user with the id: {}", id);
-        userRestClient.deleteUserByID(id);
+        userRestClient.deleteUserByID(id, accessToken);
     }
 
-    public TODO createTODO(TODO todo) {
+    public TODO createTODO(TODO todo, String accessToken) {
         LOGGER.info("Create a TODO {} for the user with id: {}", todo, todo.getUserId());
-        return userRestClient.createTODO(todo, todo.getUserId());
+        return userRestClient.createTODO(todo, todo.getUserId(), accessToken);
     }
 
     public TODO[] getTODOs(Long userId, String title, String status) {

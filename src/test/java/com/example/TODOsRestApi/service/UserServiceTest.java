@@ -21,18 +21,19 @@ class UserServiceTest {
     private UserService userService;
     @Mock
     private UserRestClient userRestClientMock;
+    private static final String accessToken = "4140ef1db63d80c58651e1de7843aaa812f2470c7319be9e053bcd46578267e8";
 
     @Test
     public void shouldRegisterUserSuccessfully() {
         // arrange
         User user = new User(-1L,"John", "jo@gmail.com", "male", "active");
-        when(userRestClientMock.registerUser(user)).thenReturn(user);
+        when(userRestClientMock.registerUser(user, accessToken)).thenReturn(user);
 
         // act
-        User response = userService.registerUser(user);
+        User response = userService.registerUser(user, accessToken);
 
         // assert
-        verify(userRestClientMock, times(1)).registerUser(user);
+        verify(userRestClientMock, times(1)).registerUser(user, accessToken);
         assertEquals(user, response);
     }
 
@@ -42,24 +43,24 @@ class UserServiceTest {
         User user = new User(-1L,"John", "jo@gmail.com", "male", "active");
 
         // act
-        userService.deleteUserById(user.getId());
+        userService.deleteUserById(user.getId(), accessToken);
 
         // assert
-        verify(userRestClientMock, times(1)).deleteUserByID(user.getId());
+        verify(userRestClientMock, times(1)).deleteUserByID(user.getId(), accessToken);
     }
 
     @Test
     public void shouldCreateTODOSuccessfully() {
         // arrange
         TODO todo = new TODO(-1L, -1L, "2022", "2023-01-01", "active");
-        when(userRestClientMock.createTODO(todo, -1L)).thenReturn(todo);
+        when(userRestClientMock.createTODO(todo, -1L, accessToken)).thenReturn(todo);
 
         // act
-        TODO response = userService.createTODO(todo);
+        TODO response = userService.createTODO(todo, accessToken);
 
         // assert
         assertEquals(todo, response);
-        verify(userRestClientMock, times(1)).createTODO(todo, todo.getUserId());
+        verify(userRestClientMock, times(1)).createTODO(todo, todo.getUserId(), accessToken);
     }
 
     @Test

@@ -30,12 +30,12 @@ class UserRestClientTest {
         User user = new User(-1L, "John", "john@gmail.com", "male", "active");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer "+ accessToken);
+        headers.set("Authorization", accessToken);
         HttpEntity<User> entity = new HttpEntity<>(user, headers);
         when(restTemplateMock.exchange(REQUEST_URI, HttpMethod.POST, entity, User.class)).thenReturn(new ResponseEntity<>(user, HttpStatus.CREATED));
 
         // act
-        User response = userRestClient.registerUser(user);
+        User response = userRestClient.registerUser(user, accessToken);
 
         // assert
         assertEquals(user, response);
@@ -47,12 +47,12 @@ class UserRestClientTest {
         // arrange
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer "+ accessToken);
+        headers.set("Authorization", accessToken);
         HttpEntity<?> entity = new HttpEntity<>(headers);
         when(restTemplateMock.exchange(REQUEST_URI + "/-1", HttpMethod.DELETE, entity, Void.class)).thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
 
         // act
-        userRestClient.deleteUserByID(-1L);
+        userRestClient.deleteUserByID(-1L, accessToken);
 
         // assert
         verify(restTemplateMock, times(1)).exchange(REQUEST_URI + "/-1", HttpMethod.DELETE, entity, Void.class);
@@ -64,12 +64,12 @@ class UserRestClientTest {
         TODO todo = new TODO(-1L, -1L, "2022", "2023-01-01", "active");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer "+ accessToken);
+        headers.set("Authorization", accessToken);
         HttpEntity<TODO> entity = new HttpEntity<>(todo, headers);
         when(restTemplateMock.exchange(REQUEST_URI + "/" + todo.getUserId() + "/todos", HttpMethod.POST, entity, TODO.class)).thenReturn(new ResponseEntity<>(todo, HttpStatus.CREATED));
 
         // act
-        TODO response = userRestClient.createTODO(todo, todo.getUserId());
+        TODO response = userRestClient.createTODO(todo, todo.getUserId(), accessToken);
 
         // assert
         assertEquals(todo, response);
@@ -86,7 +86,6 @@ class UserRestClientTest {
         TODO[] todos = {firstTODO, secondTODO, thirdTODO};
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer "+ accessToken);
         HttpEntity<String> entity = new HttpEntity<>("body", headers);
         when(restTemplateMock.exchange(REQUEST_URI + "/" + userId + "/todos", HttpMethod.GET, entity, TODO[].class)).thenReturn(new ResponseEntity<>(todos, HttpStatus.OK));
 

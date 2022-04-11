@@ -33,6 +33,7 @@ public class UserControllerTest {
     private MockMvc mockMvc;
     @Autowired
     ObjectMapper mapper;
+    private static final String accessToken = "4140ef1db63d80c58651e1de7843aaa812f2470c7319be9e053bcd46578267e8";
 
     public UserControllerTest() {
     }
@@ -41,9 +42,10 @@ public class UserControllerTest {
     public void shouldRegisterUserSuccessfully() throws Exception {
         // arrange
         User user = new User(-1L,"John", "jo@gmail.com", "male", "active");
-        when(userServiceMock.registerUser(user)).thenReturn(user);
+        when(userServiceMock.registerUser(user, accessToken)).thenReturn(user);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", accessToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(this.mapper.writeValueAsString(user));
 
@@ -59,9 +61,10 @@ public class UserControllerTest {
     public void shouldReturnStatusCode400WhenRegisteringUser() throws Exception {
         // arrange
         User user = new User(-1L,"John", "jo@gmail.com", "mal", "active");
-        when(userServiceMock.registerUser(user)).thenReturn(user);
+        when(userServiceMock.registerUser(user, accessToken)).thenReturn(user);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", accessToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(this.mapper.writeValueAsString(user));
 
@@ -76,20 +79,22 @@ public class UserControllerTest {
         User user = new User(-1L,"John", "jo@gmail.com", "male", "active");
 
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.delete("/users/-1")
+                .header("Authorization", accessToken)
                 .contentType(MediaType.APPLICATION_JSON);
 
         // act & assert
         mockMvc.perform(mockRequest).andExpect(status().isNoContent());
-        verify(userServiceMock, times(1)).deleteUserById(user.getId());
+        verify(userServiceMock, times(1)).deleteUserById(user.getId(), accessToken);
     }
 
     @Test
     public void shouldCreateTODOSuccessfully() throws Exception {
         // arrange
         TODO todo = new TODO(-1L, -1L, "2022", "2023-01-01", "pending");
-        when(userServiceMock.createTODO(todo)).thenReturn(todo);
+        when(userServiceMock.createTODO(todo, accessToken)).thenReturn(todo);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/-1/todos")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", accessToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(this.mapper.writeValueAsString(todo));
 
@@ -105,9 +110,10 @@ public class UserControllerTest {
     public void shouldReturnStatusCode400WhenCreatingTODO() throws Exception {
         // arrange
         TODO todo = new TODO(-1L, -1L, "2022", "2023-01-01", "active");
-        when(userServiceMock.createTODO(todo)).thenReturn(todo);
+        when(userServiceMock.createTODO(todo, accessToken)).thenReturn(todo);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/-1/todos")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", accessToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(this.mapper.writeValueAsString(todo));
 
