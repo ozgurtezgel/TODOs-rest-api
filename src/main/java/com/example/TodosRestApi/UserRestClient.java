@@ -35,6 +35,7 @@ public class UserRestClient {
         HttpEntity<User> entity = new HttpEntity<>(user, headers);
         ResponseEntity<User> responseEntity = restTemplate.exchange(REQUEST_URI, HttpMethod.POST, entity, User.class);
         LOGGER.info("Status code value: " + responseEntity.getStatusCodeValue());
+        LOGGER.info("Body: " + responseEntity.getBody());
 //        System.out.println(responseEntity.getBody().toString());
         return responseEntity.getBody();
     }
