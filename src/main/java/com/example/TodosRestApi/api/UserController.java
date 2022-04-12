@@ -1,8 +1,8 @@
-package com.example.TODOsRestApi.api;
+package com.example.TodosRestApi.api;
 
-import com.example.TODOsRestApi.model.TODO;
-import com.example.TODOsRestApi.model.User;
-import com.example.TODOsRestApi.service.UserService;
+import com.example.TodosRestApi.model.TODOItem;
+import com.example.TodosRestApi.model.User;
+import com.example.TodosRestApi.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -27,33 +27,29 @@ public class UserController {
 
     @PostMapping(path = "register")
     @ResponseStatus(HttpStatus.CREATED)
-    public User registerUser(@Valid @RequestBody User user, @RequestHeader(value = "Authorization", required = false) String accessToken) {
-        LOGGER.info("POST " + BASE_URL + "/register");
+    public User registerUser(@Valid @RequestBody User user) {
         System.out.println(user);
-        return userService.registerUser(user, accessToken);
+        return userService.registerUser(user);
     }
 
+    //  @RequestHeader(value = "Authorization", required = false) String accessToken
     @DeleteMapping(path = "{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUserById(@PathVariable("id") Long id, @RequestHeader(value = "Authorization", required = false) String accessToken) {
-        LOGGER.info("DELETE " + BASE_URL + "/{}", id);
-        userService.deleteUserById(id, accessToken);
+    public void deleteUserById(@PathVariable("id") Long id) {
+        userService.deleteUserById(id);
     }
 
     @PostMapping(path = "{userId}/todos")
     @ResponseStatus(HttpStatus.CREATED)
-    public TODO createTODO(@Valid @RequestBody TODO todo, @PathVariable("userId") Long userId, @RequestHeader(value = "Authorization", required = false) String accessToken) {
-        LOGGER.info("POST " + BASE_URL + "/{}/todos", userId);
+    public TODOItem createTODO(@Valid @RequestBody TODOItem todo, @PathVariable("userId") Long userId) {
         todo.setUserId(userId);
-        System.out.println(todo);
-        return userService.createTODO(todo, accessToken);
+        return userService.createTODO(todo);
     }
 
     @GetMapping(path = "{id}/todos")
     @ResponseStatus(HttpStatus.OK)
-    public List<TODO> getTODOs(@PathVariable("id") Long id, @RequestParam(required = false, value = "title", defaultValue = "") String title, @RequestParam(required = false, value = "status", defaultValue = "") String status) {
-        LOGGER.info("GET " + BASE_URL + "/{}/todos", id);
-        return Arrays.stream(userService.getTODOs(id, title, status)).toList();
+    public List<TODOItem> getTODOs(@PathVariable("id") Long id, @RequestParam(required = false, value = "title", defaultValue = "") String title, @RequestParam(required = false, value = "status", defaultValue = "") String status) {
+        return userService.getTODOs(id, title, status);
     }
 
 //    @GetMapping(path = "{id}/todos")
@@ -65,8 +61,7 @@ public class UserController {
 
     @GetMapping(path = "{userId}/{id}/todo")
     @ResponseStatus(HttpStatus.OK)
-    public TODO getTODO(@PathVariable("userId") Long userId, @PathVariable("id") Long id) {
-        LOGGER.info("GET " + BASE_URL + "/{}/{}/todo", userId, id);
+    public TODOItem getTODO(@PathVariable("userId") Long userId, @PathVariable("id") Long id) {
         return userService.getTODO(userId, id);
     }
 }
