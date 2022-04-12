@@ -1,4 +1,4 @@
-package com.example.TODOsRestApi.model;
+package com.example.TodosRestApi.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.example.TODOsRestApi;
+package com.example.TodosRestApi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
