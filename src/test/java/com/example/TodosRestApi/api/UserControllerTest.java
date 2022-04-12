@@ -1,22 +1,24 @@
-package com.example.TODOsRestApi.api;
+package com.example.TodosRestApi.api;
 
-import com.example.TODOsRestApi.model.TODO;
-import com.example.TODOsRestApi.model.User;
-import com.example.TODOsRestApi.service.UserService;
+import com.example.TodosRestApi.model.TODOItem;
+import com.example.TodosRestApi.model.User;
+import com.example.TodosRestApi.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(UserController.class)
 public class UserControllerTest {
-
 
     @MockBean
     private UserService userServiceMock;
@@ -42,7 +43,7 @@ public class UserControllerTest {
     public void shouldRegisterUserSuccessfully() throws Exception {
         // arrange
         User user = new User(-1L,"John", "jo@gmail.com", "male", "active");
-        when(userServiceMock.registerUser(user, accessToken)).thenReturn(user);
+        when(userServiceMock.registerUser(user)).thenReturn(user);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", accessToken)
@@ -61,7 +62,7 @@ public class UserControllerTest {
     public void shouldReturnStatusCode400WhenRegisteringUser() throws Exception {
         // arrange
         User user = new User(-1L,"John", "jo@gmail.com", "mal", "active");
-        when(userServiceMock.registerUser(user, accessToken)).thenReturn(user);
+        when(userServiceMock.registerUser(user)).thenReturn(user);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", accessToken)
@@ -71,7 +72,6 @@ public class UserControllerTest {
         // act & assert
         mockMvc.perform(mockRequest).andExpect(status().isBadRequest());
     }
-
 
     @Test
     public void shouldDeleteUserSuccessfully() throws Exception {
@@ -84,14 +84,14 @@ public class UserControllerTest {
 
         // act & assert
         mockMvc.perform(mockRequest).andExpect(status().isNoContent());
-        verify(userServiceMock, times(1)).deleteUserById(user.getId(), accessToken);
+        verify(userServiceMock, times(1)).deleteUserById(user.getId());
     }
 
     @Test
     public void shouldCreateTODOSuccessfully() throws Exception {
         // arrange
-        TODO todo = new TODO(-1L, -1L, "2022", "2023-01-01", "pending");
-        when(userServiceMock.createTODO(todo, accessToken)).thenReturn(todo);
+        TODOItem todo = new TODOItem(-1L, -1L, "2022", "2023-01-01", "pending");
+        when(userServiceMock.createTODO(todo)).thenReturn(todo);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/-1/todos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", accessToken)
@@ -109,8 +109,8 @@ public class UserControllerTest {
     @Test
     public void shouldReturnStatusCode400WhenCreatingTODO() throws Exception {
         // arrange
-        TODO todo = new TODO(-1L, -1L, "2022", "2023-01-01", "active");
-        when(userServiceMock.createTODO(todo, accessToken)).thenReturn(todo);
+        TODOItem todo = new TODOItem(-1L, -1L, "2022", "2023-01-01", "active");
+        when(userServiceMock.createTODO(todo)).thenReturn(todo);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/-1/todos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", accessToken)
@@ -125,7 +125,7 @@ public class UserControllerTest {
     public void shouldGetTODOSuccessfully() throws Exception {
         // arrange
         Long userId = -1L;
-        TODO thirdTODO = new TODO(-3L, userId, "Groceries", "2022-03-16", "completed");
+        TODOItem thirdTODO = new TODOItem(-3L, userId, "Groceries", "2022-03-16", "completed");
         when(userServiceMock.getTODO(userId, -3L)).thenReturn(thirdTODO);
 
         // act & assert
@@ -141,10 +141,10 @@ public class UserControllerTest {
     public void shouldGetTODOsSuccessfully() throws Exception {
         // arrange
         Long userId = -1L;
-        TODO firstTODO = new TODO(-1L, userId, "Math Class", "2022-06-06", "pending");
-        TODO secondTODO = new TODO(-2L, userId, "Sport", "2022-06-30", "pending");
-        TODO thirdTODO = new TODO(-3L, userId, "Groceries", "2022-03-16", "completed");
-        TODO[] todos = {firstTODO, secondTODO, thirdTODO};
+        TODOItem firstTODO = new TODOItem(-1L, userId, "Math Class", "2022-06-06", "pending");
+        TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2022-06-30", "pending");
+        TODOItem thirdTODO = new TODOItem(-3L, userId, "Groceries", "2022-03-16", "completed");
+        List<TODOItem> todos = List.of(firstTODO, secondTODO, thirdTODO);
         when(userServiceMock.getTODOs(userId, "", "")).thenReturn(todos);
 
         // act & assert
@@ -161,9 +161,9 @@ public class UserControllerTest {
     public void shouldGetSpecifiedTwoTODOsWithBothParameters() throws Exception {
         // arrange
         Long userId = -1L;
-        TODO secondTODO = new TODO(-2L, userId, "Sport", "2023-06-30", "pending");
-        TODO fourthTODO = new TODO(-4L, userId, "Outdoor sport", "2023-01-06", "pending");
-        TODO[] todos = {secondTODO, fourthTODO};
+        TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2023-06-30", "pending");
+        TODOItem fourthTODO = new TODOItem(-4L, userId, "Outdoor sport", "2023-01-06", "pending");
+        List<TODOItem> todos = List.of(secondTODO, fourthTODO);
         when(userServiceMock.getTODOs(userId, "spor", "pending")).thenReturn(todos);
 
         // act & assert
@@ -184,7 +184,7 @@ public class UserControllerTest {
     public void shouldReturnEmptyList() throws Exception {
         // arrange
         Long userId = -1L;
-        TODO[] todos = {};
+        List<TODOItem> todos = new ArrayList<>();
         when(userServiceMock.getTODOs(userId, "Spor", "completed")).thenReturn(todos);
 
         // act & assert
@@ -199,8 +199,8 @@ public class UserControllerTest {
     public void shouldGetSpecifiedTODOWithTitle() throws Exception {
         // arrange
         Long userId = -1L;
-        TODO secondTODO = new TODO(-2L, userId, "Sport", "2022-06-30", "pending");
-        TODO[] todos = {secondTODO};
+        TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2022-06-30", "pending");
+        List<TODOItem> todos = List.of(secondTODO);
         when(userServiceMock.getTODOs(userId, "sport", "")).thenReturn(todos);
 
         // act & assert
@@ -218,9 +218,9 @@ public class UserControllerTest {
     public void shouldGetSpecifiedTODOsWithTitle() throws Exception {
         // arrange
         Long userId = -1L;
-        TODO secondTODO = new TODO(-2L, userId, "Sport", "2022-06-30", "pending");
-        TODO fourthTODO = new TODO(-4L, userId, "Outdoor sport", "2021-01-06", "completed");
-        TODO[] todos = {secondTODO, fourthTODO};
+        TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2022-06-30", "pending");
+        TODOItem fourthTODO = new TODOItem(-4L, userId, "Outdoor sport", "2021-01-06", "completed");
+        List<TODOItem> todos = List.of(secondTODO, fourthTODO);
         when(userServiceMock.getTODOs(userId, "Sport", "")).thenReturn(todos);
 
         // act & assert
@@ -239,9 +239,9 @@ public class UserControllerTest {
     public void shouldGetSpecifiedTODOsWithStatus() throws Exception {
         // arrange
         Long userId = -1L;
-        TODO firstTODO = new TODO(-1L, userId, "Math Class", "2022-06-06", "pending");
-        TODO secondTODO = new TODO(-2L, userId, "Sport", "2022-06-30", "pending");
-        TODO[] todos = {firstTODO, secondTODO};
+        TODOItem firstTODO = new TODOItem(-1L, userId, "Math Class", "2022-06-06", "pending");
+        TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2022-06-30", "pending");
+        List<TODOItem> todos = List.of(firstTODO, secondTODO);
         when(userServiceMock.getTODOs(userId, "", "pending")).thenReturn(todos);
 
         // act & assert
@@ -255,5 +255,4 @@ public class UserControllerTest {
                         .andExpect(jsonPath("$[1].status", is("pending")));
         verify(userServiceMock, times(1)).getTODOs(userId, "", "pending");
     }
-
 }

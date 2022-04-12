@@ -1,9 +1,8 @@
-package com.example.TODOsRestApi;
+package com.example.TodosRestApi;
 
-import com.example.TODOsRestApi.model.TODO;
-import com.example.TODOsRestApi.model.User;
+import com.example.TodosRestApi.model.TODOItem;
+import com.example.TodosRestApi.model.User;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,6 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -35,7 +37,7 @@ class UserRestClientTest {
         when(restTemplateMock.exchange(REQUEST_URI, HttpMethod.POST, entity, User.class)).thenReturn(new ResponseEntity<>(user, HttpStatus.CREATED));
 
         // act
-        User response = userRestClient.registerUser(user, accessToken);
+        User response = userRestClient.registerUser(user);
 
         // assert
         assertEquals(user, response);
@@ -52,7 +54,7 @@ class UserRestClientTest {
         when(restTemplateMock.exchange(REQUEST_URI + "/-1", HttpMethod.DELETE, entity, Void.class)).thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
 
         // act
-        userRestClient.deleteUserByID(-1L, accessToken);
+        userRestClient.deleteUserByID(-1L);
 
         // assert
         verify(restTemplateMock, times(1)).exchange(REQUEST_URI + "/-1", HttpMethod.DELETE, entity, Void.class);
@@ -61,40 +63,41 @@ class UserRestClientTest {
     @Test
     public void shouldCreateTODOSuccessfully() {
         // arrange
-        TODO todo = new TODO(-1L, -1L, "2022", "2023-01-01", "active");
+        TODOItem todo = new TODOItem(-1L, -1L, "2022", "2023-01-01", "active");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", accessToken);
-        HttpEntity<TODO> entity = new HttpEntity<>(todo, headers);
-        when(restTemplateMock.exchange(REQUEST_URI + "/" + todo.getUserId() + "/todos", HttpMethod.POST, entity, TODO.class)).thenReturn(new ResponseEntity<>(todo, HttpStatus.CREATED));
+        HttpEntity<TODOItem> entity = new HttpEntity<>(todo, headers);
+        when(restTemplateMock.exchange(REQUEST_URI + "/" + todo.getUserId() + "/todos", HttpMethod.POST, entity, TODOItem.class)).thenReturn(new ResponseEntity<>(todo, HttpStatus.CREATED));
 
         // act
-        TODO response = userRestClient.createTODO(todo, todo.getUserId(), accessToken);
+        TODOItem response = userRestClient.createTODO(todo, todo.getUserId());
 
         // assert
         assertEquals(todo, response);
-        verify(restTemplateMock, times(1)).exchange(REQUEST_URI + "/" + todo.getUserId() + "/todos", HttpMethod.POST, entity, TODO.class);
+        verify(restTemplateMock, times(1)).exchange(REQUEST_URI + "/" + todo.getUserId() + "/todos", HttpMethod.POST, entity, TODOItem.class);
     }
 
     @Test
     public void shouldGetTODOsSuccessfully() {
         // arrange
         Long userId = -1L;
-        TODO firstTODO = new TODO(-1L, userId, "Math Class", "2022-06-06", "pending");
-        TODO secondTODO = new TODO(-2L, userId, "Sport", "2022-06-30", "pending");
-        TODO thirdTODO = new TODO(-3L, userId, "Groceries", "2022-03-16", "completed");
-        TODO[] todos = {firstTODO, secondTODO, thirdTODO};
+        TODOItem firstTODO = new TODOItem(-1L, userId, "Math Class", "2022-06-06", "pending");
+        TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2022-06-30", "pending");
+        TODOItem thirdTODO = new TODOItem(-3L, userId, "Groceries", "2022-03-16", "completed");
+        TODOItem[] todos = {firstTODO, secondTODO, thirdTODO};
+        List<TODOItem> expected = List.of(firstTODO, secondTODO, thirdTODO);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>("body", headers);
-        when(restTemplateMock.exchange(REQUEST_URI + "/" + userId + "/todos", HttpMethod.GET, entity, TODO[].class)).thenReturn(new ResponseEntity<>(todos, HttpStatus.OK));
+        when(restTemplateMock.exchange(REQUEST_URI + "/" + userId + "/todos", HttpMethod.GET, entity, TODOItem[].class)).thenReturn(new ResponseEntity<>(todos, HttpStatus.OK));
 
         // act
-        TODO[] response = userRestClient.getTODOs(userId);
+        List<TODOItem> response = userRestClient.getTODOs(userId);
 
         // assert
-        assertEquals(todos.length, response.length);
-        assertEquals(todos, response);
-        verify(restTemplateMock, times(1)).exchange(REQUEST_URI + "/" + userId + "/todos", HttpMethod.GET, entity, TODO[].class);
+        assertEquals(expected.size(), response.size());
+        assertEquals(expected, response);
+        verify(restTemplateMock, times(1)).exchange(REQUEST_URI + "/" + userId + "/todos", HttpMethod.GET, entity, TODOItem[].class);
     }
 }

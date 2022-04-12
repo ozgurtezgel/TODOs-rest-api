@@ -1,4 +1,4 @@
-package com.example.TODOsRestApi;
+package com.example.TodosRestApi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
