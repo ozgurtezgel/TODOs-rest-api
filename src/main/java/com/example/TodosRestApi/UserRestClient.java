@@ -22,14 +22,12 @@ public class UserRestClient {
     private static final String REQUEST_URI = "https://gorest.co.in/public/v2/users";
     @Value("${access.token}")
     private String accessToken;
-    @Autowired
     @Lazy
     private RestTemplate restTemplate;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserRestClient.class);
 
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
+    public UserRestClient(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     public User registerUser(User user) {
