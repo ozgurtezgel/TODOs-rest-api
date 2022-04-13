@@ -5,8 +5,10 @@ import com.example.TodosRestApi.model.User;
 import com.example.TodosRestApi.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.Arrays;
@@ -17,51 +19,62 @@ import java.util.List;
 public class UserController {
 
     static final String BASE_URL = "/users";
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
+    @Value("${client.id}")
+    private String ID;
+    @Value("${client.secret}")
+    private String secret;
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-
     @PostMapping(path = "register")
     @ResponseStatus(HttpStatus.CREATED)
-    public User registerUser(@Valid @RequestBody User user) {
+    public User registerUser(@Valid @RequestBody User user, @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
         System.out.println(user);
-        return userService.registerUser(user);
+        if (clientId.equals(ID) && clientSecret.equals(secret)) {
+            return userService.registerUser(user);
+        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid client id or secret");
     }
 
-    //  @RequestHeader(value = "Authorization", required = false) String accessToken
     @DeleteMapping(path = "{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUserById(@PathVariable("id") Long id) {
-        userService.deleteUserById(id);
+    public void deleteUserById(@PathVariable("id") Long id, @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
+        if (clientId.equals(ID) && clientSecret.equals(secret)) {
+            userService.deleteUserById(id);
+        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid client id or secret");
     }
 
     @PostMapping(path = "{userId}/todos")
     @ResponseStatus(HttpStatus.CREATED)
-    public TODOItem createTODO(@Valid @RequestBody TODOItem todo, @PathVariable("userId") Long userId) {
-        todo.setUserId(userId);
-        return userService.createTODO(todo);
+    public TODOItem createTODO(@Valid @RequestBody TODOItem todo, @PathVariable("userId") Long userId, @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
+        if (clientId.equals(ID) && clientSecret.equals(secret)) {
+            todo.setUserId(userId);
+            return userService.createTODO(todo);
+        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid client id or secret");
     }
 
     @GetMapping(path = "{id}/todos")
     @ResponseStatus(HttpStatus.OK)
-    public List<TODOItem> getTODOs(@PathVariable("id") Long id, @RequestParam(required = false, value = "title", defaultValue = "") String title, @RequestParam(required = false, value = "status", defaultValue = "") String status) {
-        return userService.getTODOs(id, title, status);
-    }
+    public List<TODOItem> getTODOs(@PathVariable("id") Long id, @RequestParam(required = false, value = "title", defaultValue = "") String title, @RequestParam(required = false, value = "status", defaultValue = "") String status,
+                                   @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
 
-//    @GetMapping(path = "{id}/todos")
-//    @ResponseStatus(HttpStatus.OK)
-//    public List<TODO> getTODOs(@PathVariable("id") Long id) {
-//        LOGGER.info("GET " + BASE_URL + "/{}/todos", id);
-//        return Arrays.stream(userService.getTODOs(id)).toList();
-//    }
+        if (clientId.equals(ID) && clientSecret.equals(secret)) {
+            return userService.getTODOs(id, title, status);
+        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid client id or secret");
+    }
 
     @GetMapping(path = "{userId}/{id}/todo")
     @ResponseStatus(HttpStatus.OK)
-    public TODOItem getTODO(@PathVariable("userId") Long userId, @PathVariable("id") Long id) {
-        return userService.getTODO(userId, id);
+    public TODOItem getTODO(@PathVariable("userId") Long userId, @PathVariable("id") Long id, @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
+        if (clientId.equals(ID) && clientSecret.equals(secret)) {
+            return userService.getTODO(userId, id);
+        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid client id or secret");
     }
 }

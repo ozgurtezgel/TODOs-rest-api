@@ -6,6 +6,7 @@ import com.example.TodosRestApi.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
@@ -19,7 +20,8 @@ import java.util.List;
 public class UserRestClient {
 
     private static final String REQUEST_URI = "https://gorest.co.in/public/v2/users";
-    private static final String accessToken = "4140ef1db63d80c58651e1de7843aaa812f2470c7319be9e053bcd46578267e8";
+    @Value("${access.token}")
+    private String accessToken;
     @Autowired
     @Lazy
     private RestTemplate restTemplate;
