@@ -8,7 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.*;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -20,7 +22,7 @@ import static org.mockito.Mockito.*;
 class UserRestClientTest {
 
     private static final String REQUEST_URI = "https://gorest.co.in/public/v2/users";
-    private static final String accessToken = "4140ef1db63d80c58651e1de7843aaa812f2470c7319be9e053bcd46578267e8";
+    private static final String accessToken = null;
     @InjectMocks
     private UserRestClient userRestClient;
     @Mock
@@ -32,7 +34,7 @@ class UserRestClientTest {
         User user = new User(-1L, "John", "john@gmail.com", "male", "active");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", accessToken);
+        headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<User> entity = new HttpEntity<>(user, headers);
         when(restTemplateMock.exchange(REQUEST_URI, HttpMethod.POST, entity, User.class)).thenReturn(new ResponseEntity<>(user, HttpStatus.CREATED));
 
@@ -49,7 +51,7 @@ class UserRestClientTest {
         // arrange
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", accessToken);
+        headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<?> entity = new HttpEntity<>(headers);
         when(restTemplateMock.exchange(REQUEST_URI + "/-1", HttpMethod.DELETE, entity, Void.class)).thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
 
@@ -66,7 +68,7 @@ class UserRestClientTest {
         TODOItem todo = new TODOItem(-1L, -1L, "2022", "2023-01-01", "active");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", accessToken);
+        headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<TODOItem> entity = new HttpEntity<>(todo, headers);
         when(restTemplateMock.exchange(REQUEST_URI + "/" + todo.getUserId() + "/todos", HttpMethod.POST, entity, TODOItem.class)).thenReturn(new ResponseEntity<>(todo, HttpStatus.CREATED));
 
