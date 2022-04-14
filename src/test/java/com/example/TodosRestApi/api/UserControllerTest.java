@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -34,7 +35,10 @@ public class UserControllerTest {
     private MockMvc mockMvc;
     @Autowired
     ObjectMapper mapper;
-    private static final String accessToken = "4140ef1db63d80c58651e1de7843aaa812f2470c7319be9e053bcd46578267e8";
+    @Value("${client.id}")
+    private String ID;
+    @Value("${client.secret}")
+    private String secret;
 
     public UserControllerTest() {
     }
@@ -46,7 +50,8 @@ public class UserControllerTest {
         when(userServiceMock.registerUser(user)).thenReturn(user);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken)
+                .header("clientId", ID)
+                .header("clientSecret", secret)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(this.mapper.writeValueAsString(user));
 
@@ -65,7 +70,8 @@ public class UserControllerTest {
         when(userServiceMock.registerUser(user)).thenReturn(user);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken)
+                .header("clientId", ID)
+                .header("clientSecret", secret)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(this.mapper.writeValueAsString(user));
 
@@ -79,7 +85,8 @@ public class UserControllerTest {
         User user = new User(-1L,"John", "jo@gmail.com", "male", "active");
 
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.delete("/users/-1")
-                .header("Authorization", accessToken)
+                .header("clientId", ID)
+                .header("clientSecret", secret)
                 .contentType(MediaType.APPLICATION_JSON);
 
         // act & assert
@@ -94,7 +101,8 @@ public class UserControllerTest {
         when(userServiceMock.createTODO(todo)).thenReturn(todo);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/-1/todos")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken)
+                .header("clientId", ID)
+                .header("clientSecret", secret)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(this.mapper.writeValueAsString(todo));
 
@@ -113,7 +121,8 @@ public class UserControllerTest {
         when(userServiceMock.createTODO(todo)).thenReturn(todo);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/-1/todos")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken)
+                .header("clientId", ID)
+                .header("clientSecret", secret)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(this.mapper.writeValueAsString(todo));
 
@@ -130,7 +139,9 @@ public class UserControllerTest {
 
         // act & assert
         ResultActions result =
-                mockMvc.perform(get("/users/-1/-3/todo").contentType(MediaType.APPLICATION_JSON))
+                mockMvc.perform(get("/users/-1/-3/todo").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", ID)
+                                .header("clientSecret", secret))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.title", is("Groceries")))
                         .andExpect(jsonPath("$.due_on", is("2022-03-16")))
@@ -149,7 +160,9 @@ public class UserControllerTest {
 
         // act & assert
         ResultActions result =
-                mockMvc.perform(get("/users/-1/todos").contentType(MediaType.APPLICATION_JSON))
+                mockMvc.perform(get("/users/-1/todos").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", ID)
+                                .header("clientSecret", secret))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$", hasSize(3)))
                         .andExpect(jsonPath("$[0].title", is("Math Class")))
@@ -168,7 +181,9 @@ public class UserControllerTest {
 
         // act & assert
         ResultActions result =
-                mockMvc.perform(get("/users/-1/todos?title=spor&status=pending").contentType(MediaType.APPLICATION_JSON))
+                mockMvc.perform(get("/users/-1/todos?title=spor&status=pending").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", ID)
+                                .header("clientSecret", secret))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$", hasSize(2)))
                         .andExpect(jsonPath("$[0].due_on", is("2023-06-30")))
@@ -189,7 +204,9 @@ public class UserControllerTest {
 
         // act & assert
         ResultActions result =
-                mockMvc.perform(get("/users/-1/todos?title=Spor&status=completed").contentType(MediaType.APPLICATION_JSON))
+                mockMvc.perform(get("/users/-1/todos?title=Spor&status=completed").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", ID)
+                                .header("clientSecret", secret))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$", hasSize(0)));
         verify(userServiceMock, times(1)).getTODOs(userId, "Spor", "completed");
@@ -205,7 +222,9 @@ public class UserControllerTest {
 
         // act & assert
         ResultActions result =
-                mockMvc.perform(get("/users/-1/todos?title=sport").contentType(MediaType.APPLICATION_JSON))
+                mockMvc.perform(get("/users/-1/todos?title=sport").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", ID)
+                                .header("clientSecret", secret))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$", hasSize(1)))
                         .andExpect(jsonPath("$[0].title", is("Sport")))
@@ -225,7 +244,9 @@ public class UserControllerTest {
 
         // act & assert
         ResultActions result =
-                mockMvc.perform(get("/users/-1/todos?title=Sport").contentType(MediaType.APPLICATION_JSON))
+                mockMvc.perform(get("/users/-1/todos?title=Sport").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", ID)
+                                .header("clientSecret", secret))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$", hasSize(2)))
                         .andExpect(jsonPath("$[0].title", is("Sport")))
@@ -246,7 +267,9 @@ public class UserControllerTest {
 
         // act & assert
         ResultActions result =
-                mockMvc.perform(get("/users/-1/todos?status=pending").contentType(MediaType.APPLICATION_JSON))
+                mockMvc.perform(get("/users/-1/todos?status=pending").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", ID)
+                                .header("clientSecret", secret))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$", hasSize(2)))
                         .andExpect(jsonPath("$[0].title", is("Math Class")))
