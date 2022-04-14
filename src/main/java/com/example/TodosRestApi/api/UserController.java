@@ -44,8 +44,9 @@ public class UserController {
     public void deleteUserById(@PathVariable("id") Long id, @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
         if (clientId.equals(ID) && clientSecret.equals(secret)) {
             userService.deleteUserById(id);
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid client id or secret");
         }
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid client id or secret");
     }
 
     @PostMapping(path = "{userId}/todos")
