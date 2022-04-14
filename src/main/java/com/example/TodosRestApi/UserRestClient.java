@@ -49,10 +49,11 @@ public class UserRestClient {
     }
 
     public List<TODOItem> getTODOs(Long id) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = prepareHeader();
         HttpEntity<String> entity = new HttpEntity<>("body", headers);
-        ResponseEntity<TODOItem[]> responseEntity = restTemplate.exchange(REQUEST_URI + "/" + id + "/todos", HttpMethod.GET, entity, TODOItem[].class);
+        String url = REQUEST_URI + "/" + id + "/todos";
+        System.out.println(url);
+        ResponseEntity<TODOItem[]> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, TODOItem[].class);
         LOGGER.info("Status code value: " + responseEntity.getStatusCodeValue());
         System.out.println(responseEntity.getBody().length);
         return Arrays.stream(responseEntity.getBody()).toList();
@@ -70,7 +71,8 @@ public class UserRestClient {
     public HttpHeaders prepareHeader() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + accessToken);
+//        headers.set("Authorization", "Bearer " + accessToken);
+        headers.set("Authorization", "Bearer 4140ef1db63d80c58651e1de7843aaa812f2470c7319be9e053bcd46578267e8");
         return headers;
     }
 }
