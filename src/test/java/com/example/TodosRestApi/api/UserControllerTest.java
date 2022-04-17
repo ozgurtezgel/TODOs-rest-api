@@ -155,7 +155,10 @@ public class UserControllerTest {
         TODOItem firstTODO = new TODOItem(-1L, userId, "Math Class", "2022-06-06", "pending");
         TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2022-06-30", "pending");
         TODOItem thirdTODO = new TODOItem(-3L, userId, "Groceries", "2022-03-16", "completed");
-        List<TODOItem> todos = List.of(firstTODO, secondTODO, thirdTODO);
+        TODOItem fourthTODO = new TODOItem(-3L, userId, "Job Application", "2021-03-16", "completed");
+        TODOItem fifthTODO = new TODOItem(-3L, userId, "Hobbies", "2023-02-20", "completed");
+        TODOItem sixthTODO = new TODOItem(-3L, userId, "Job", "2024-05-06", "pending");
+        List<TODOItem> todos = List.of(firstTODO, secondTODO, thirdTODO, fourthTODO, fifthTODO, sixthTODO);
         when(userServiceMock.getTODOs(userId, "", "")).thenReturn(todos);
 
         // act & assert
@@ -164,52 +167,39 @@ public class UserControllerTest {
                                 .header("clientId", ID)
                                 .header("clientSecret", secret))
                         .andExpect(status().isOk())
-                        .andExpect(jsonPath("$", hasSize(3)))
-                        .andExpect(jsonPath("$[0].title", is("Math Class")))
-                        .andExpect(jsonPath("$[1].due_on", is("2022-06-30")))
-                        .andExpect(jsonPath("$[2].status", is("completed")));
+                        .andExpect(jsonPath("_embedded.tODOItemList", hasSize(6)))
+                        .andExpect(jsonPath("_embedded.tODOItemList[0].title", is(firstTODO.getTitle())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[1].due_on", is(secondTODO.getDue_on())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[2].status", is(thirdTODO.getStatus())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[3].title", is(fourthTODO.getTitle())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[4].due_on", is(fifthTODO.getDue_on())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[5].status", is(sixthTODO.getStatus())));
     }
 
     @Test
     public void shouldGetSpecifiedTwoTODOsWithBothParameters() throws Exception {
         // arrange
         Long userId = -1L;
-        TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2023-06-30", "pending");
-        TODOItem fourthTODO = new TODOItem(-4L, userId, "Outdoor sport", "2023-01-06", "pending");
-        List<TODOItem> todos = List.of(secondTODO, fourthTODO);
-        when(userServiceMock.getTODOs(userId, "spor", "pending")).thenReturn(todos);
+        TODOItem fourthTODO = new TODOItem(-3L, userId, "Job Application", "2021-03-16", "completed");
+        TODOItem sixthTODO = new TODOItem(-3L, userId, "Job", "2024-05-06", "pending");
+        List<TODOItem> todos = List.of(fourthTODO, sixthTODO);
+        when(userServiceMock.getTODOs(userId, "job", "")).thenReturn(todos);
 
         // act & assert
         ResultActions result =
-                mockMvc.perform(get("/users/-1/todos?title=spor&status=pending").contentType(MediaType.APPLICATION_JSON)
+                mockMvc.perform(get("/users/-1/todos").contentType(MediaType.APPLICATION_JSON)
                                 .header("clientId", ID)
-                                .header("clientSecret", secret))
+                                .header("clientSecret", secret)
+                                .param("title", "job"))
                         .andExpect(status().isOk())
-                        .andExpect(jsonPath("$", hasSize(2)))
-                        .andExpect(jsonPath("$[0].due_on", is("2023-06-30")))
-                        .andExpect(jsonPath("$[1].due_on", is("2023-01-06")))
-                        .andExpect(jsonPath("$[0].title", is("Sport")))
-                        .andExpect(jsonPath("$[1].title", is("Outdoor sport")))
-                        .andExpect(jsonPath("$[0].status", is("pending")))
-                        .andExpect(jsonPath("$[1].status", is("pending")));
-        verify(userServiceMock, times(1)).getTODOs(userId, "spor", "pending");
-    }
-
-    @Test
-    public void shouldReturnEmptyList() throws Exception {
-        // arrange
-        Long userId = -1L;
-        List<TODOItem> todos = new ArrayList<>();
-        when(userServiceMock.getTODOs(userId, "Spor", "completed")).thenReturn(todos);
-
-        // act & assert
-        ResultActions result =
-                mockMvc.perform(get("/users/-1/todos?title=Spor&status=completed").contentType(MediaType.APPLICATION_JSON)
-                                .header("clientId", ID)
-                                .header("clientSecret", secret))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$", hasSize(0)));
-        verify(userServiceMock, times(1)).getTODOs(userId, "Spor", "completed");
+                        .andExpect(jsonPath("_embedded.tODOItemList", hasSize(2)))
+                        .andExpect(jsonPath("_embedded.tODOItemList[0].title", is(fourthTODO.getTitle())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[0].due_on", is(fourthTODO.getDue_on())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[0].status", is(fourthTODO.getStatus())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[1].title", is(sixthTODO.getTitle())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[1].due_on", is(sixthTODO.getDue_on())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[1].status", is(sixthTODO.getStatus())));
+        verify(userServiceMock, times(1)).getTODOs(userId, "job", "");
     }
 
     @Test
@@ -222,60 +212,96 @@ public class UserControllerTest {
 
         // act & assert
         ResultActions result =
-                mockMvc.perform(get("/users/-1/todos?title=sport").contentType(MediaType.APPLICATION_JSON)
+                mockMvc.perform(get("/users/-1/todos").contentType(MediaType.APPLICATION_JSON)
                                 .header("clientId", ID)
-                                .header("clientSecret", secret))
+                                .header("clientSecret", secret)
+                                .param("title", "sport"))
                         .andExpect(status().isOk())
-                        .andExpect(jsonPath("$", hasSize(1)))
-                        .andExpect(jsonPath("$[0].title", is("Sport")))
-                        .andExpect(jsonPath("$[0].due_on", is("2022-06-30")))
-                        .andExpect(jsonPath("$[0].status", is("pending")));
+                        .andExpect(jsonPath("_embedded.tODOItemList", hasSize(1)))
+                        .andExpect(jsonPath("_embedded.tODOItemList[0].title", is("Sport")))
+                        .andExpect(jsonPath("_embedded.tODOItemList[0].due_on", is("2022-06-30")))
+                        .andExpect(jsonPath("_embedded.tODOItemList[0].status", is("pending")));
         verify(userServiceMock, times(1)).getTODOs(userId, "sport", "");
     }
 
     @Test
-    public void shouldGetSpecifiedTODOsWithTitle() throws Exception {
-        // arrange
-        Long userId = -1L;
-        TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2022-06-30", "pending");
-        TODOItem fourthTODO = new TODOItem(-4L, userId, "Outdoor sport", "2021-01-06", "completed");
-        List<TODOItem> todos = List.of(secondTODO, fourthTODO);
-        when(userServiceMock.getTODOs(userId, "Sport", "")).thenReturn(todos);
-
-        // act & assert
-        ResultActions result =
-                mockMvc.perform(get("/users/-1/todos?title=Sport").contentType(MediaType.APPLICATION_JSON)
-                                .header("clientId", ID)
-                                .header("clientSecret", secret))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$", hasSize(2)))
-                        .andExpect(jsonPath("$[0].title", is("Sport")))
-                        .andExpect(jsonPath("$[0].status", is("pending")))
-                        .andExpect(jsonPath("$[1].title", is("Outdoor sport")))
-                        .andExpect(jsonPath("$[1].status", is("completed")));
-        verify(userServiceMock, times(1)).getTODOs(userId, "Sport", "");
-    }
-
-    @Test
-    public void shouldGetSpecifiedTODOsWithStatus() throws Exception {
+    public void shouldGetSpecifiedTODOsWithPageSize() throws Exception {
         // arrange
         Long userId = -1L;
         TODOItem firstTODO = new TODOItem(-1L, userId, "Math Class", "2022-06-06", "pending");
         TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2022-06-30", "pending");
-        List<TODOItem> todos = List.of(firstTODO, secondTODO);
-        when(userServiceMock.getTODOs(userId, "", "pending")).thenReturn(todos);
+        TODOItem thirdTODO = new TODOItem(-3L, userId, "Groceries", "2022-03-16", "completed");
+        TODOItem fourthTODO = new TODOItem(-3L, userId, "Job Application", "2021-03-16", "completed");
+        TODOItem fifthTODO = new TODOItem(-3L, userId, "Hobbies", "2023-02-20", "completed");
+        TODOItem sixthTODO = new TODOItem(-3L, userId, "Job", "2024-05-06", "pending");
+        List<TODOItem> todos = List.of(firstTODO, secondTODO, thirdTODO, fourthTODO, fifthTODO, sixthTODO);
+        when(userServiceMock.getTODOs(userId, "", "")).thenReturn(todos);
 
         // act & assert
         ResultActions result =
-                mockMvc.perform(get("/users/-1/todos?status=pending").contentType(MediaType.APPLICATION_JSON)
+                mockMvc.perform(get("/users/-1/todos").contentType(MediaType.APPLICATION_JSON)
                                 .header("clientId", ID)
-                                .header("clientSecret", secret))
+                                .header("clientSecret", secret)
+                                .param("pageSize", "3"))
                         .andExpect(status().isOk())
-                        .andExpect(jsonPath("$", hasSize(2)))
-                        .andExpect(jsonPath("$[0].title", is("Math Class")))
-                        .andExpect(jsonPath("$[0].status", is("pending")))
-                        .andExpect(jsonPath("$[1].title", is("Sport")))
-                        .andExpect(jsonPath("$[1].status", is("pending")));
-        verify(userServiceMock, times(1)).getTODOs(userId, "", "pending");
+                        .andExpect(jsonPath("_embedded.tODOItemList", hasSize(3)))
+                        .andExpect(jsonPath("_embedded.tODOItemList[0].title", is(firstTODO.getTitle())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[1].title", is(secondTODO.getTitle())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[2].title", is(thirdTODO.getTitle())))
+                        .andExpect(jsonPath("_links.next.href", is("http://localhost/users/-1/todos?title=&status=&pageSize=3&page=1")));
+        verify(userServiceMock, times(1)).getTODOs(userId, "", "");
+    }
+
+    @Test
+    public void shouldGetSpecifiedTODOsWithPageSizeAndStatus() throws Exception {
+        // arrange
+        Long userId = -1L;
+        TODOItem thirdTODO = new TODOItem(-3L, userId, "Groceries", "2022-03-16", "completed");
+        TODOItem fourthTODO = new TODOItem(-3L, userId, "Job Application", "2021-03-16", "completed");
+        TODOItem fifthTODO = new TODOItem(-3L, userId, "Hobbies", "2023-02-20", "completed");
+        List<TODOItem> todos = List.of(thirdTODO, fourthTODO, fifthTODO);
+        when(userServiceMock.getTODOs(userId, "", "completed")).thenReturn(todos);
+
+        // act & assert
+        ResultActions result =
+                mockMvc.perform(get("/users/-1/todos").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", ID)
+                                .header("clientSecret", secret)
+                                .param("status", "completed")
+                                .param("pageSize", "2"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("_embedded.tODOItemList", hasSize(2)))
+                        .andExpect(jsonPath("_embedded.tODOItemList[0].title", is(thirdTODO.getTitle())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[1].title", is(fourthTODO.getTitle())))
+                        .andExpect(jsonPath("_links.next.href", is("http://localhost/users/-1/todos?title=&status=completed&pageSize=2&page=1")));
+        verify(userServiceMock, times(1)).getTODOs(userId, "", "completed");
+    }
+
+    @Test
+    public void shouldGetSpecifiedTODOsWithPageSizeAndPage() throws Exception {
+        // arrange
+        Long userId = -1L;
+        TODOItem firstTODO = new TODOItem(-1L, userId, "Math Class", "2022-06-06", "pending");
+        TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2022-06-30", "pending");
+        TODOItem thirdTODO = new TODOItem(-3L, userId, "Groceries", "2022-03-16", "completed");
+        TODOItem fourthTODO = new TODOItem(-3L, userId, "Job Application", "2021-03-16", "completed");
+        TODOItem fifthTODO = new TODOItem(-3L, userId, "Hobbies", "2023-02-20", "completed");
+        TODOItem sixthTODO = new TODOItem(-3L, userId, "Job", "2024-05-06", "pending");
+        List<TODOItem> todos = List.of(firstTODO, secondTODO, thirdTODO, fourthTODO, fifthTODO, sixthTODO);
+        when(userServiceMock.getTODOs(userId, "", "")).thenReturn(todos);
+
+        // act & assert
+        ResultActions result =
+                mockMvc.perform(get("/users/-1/todos").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", ID)
+                                .header("clientSecret", secret)
+                                .param("pageSize", "2")
+                                .param("page", "1"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("_embedded.tODOItemList", hasSize(2)))
+                        .andExpect(jsonPath("_embedded.tODOItemList[0].title", is(thirdTODO.getTitle())))
+                        .andExpect(jsonPath("_embedded.tODOItemList[1].title", is(fourthTODO.getTitle())))
+                        .andExpect(jsonPath("_links.next.href", is("http://localhost/users/-1/todos?title=&status=&pageSize=2&page=2")));
+        verify(userServiceMock, times(1)).getTODOs(userId, "", "");
     }
 }
