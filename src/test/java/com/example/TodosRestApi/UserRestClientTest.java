@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class UserRestClientTest {
 
     private static final String REQUEST_URI = "https://gorest.co.in/public/v2/users";
-    private static final String accessToken = null;
+    private static final String accessToken = "4140ef1db63d80c58651e1de7843aaa812f2470c7319be9e053bcd46578267e8";
     @InjectMocks
     private UserRestClient userRestClient;
     @Mock
@@ -91,6 +91,7 @@ class UserRestClientTest {
         List<TODOItem> expected = List.of(firstTODO, secondTODO, thirdTODO);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<String> entity = new HttpEntity<>("body", headers);
         when(restTemplateMock.exchange(REQUEST_URI + "/" + userId + "/todos", HttpMethod.GET, entity, TODOItem[].class)).thenReturn(new ResponseEntity<>(todos, HttpStatus.OK));
 
