@@ -39,41 +39,27 @@ public class UserService {
         LOGGER.info("Get the TODO of the user with the id: {} matching the parameters title: {}, status: {}", userId, title, status);
         List<TODOItem> todos = userRestClient.getTODOs(userId);
         List<TODOItem> result = new ArrayList<>();
-        if (status.equals("")) {
-            for (int i = 0; i < todos.size() ; i++) {
-                if (todos.get(i).getTitle().toLowerCase().contains(title.toLowerCase())) {
-                    result.add(todos.get(i));
-                }
-            }
-        } else {
-            for (int i = 0; i < todos.size() ; i++) {
-                if (todos.get(i).getStatus().equals(status) && todos.get(i).getTitle().toLowerCase().contains(title.toLowerCase())) {
-                    result.add(todos.get(i));
-                }
-            }
-        }
-        return result;
 
-//        TODOItem[] todos = userRestClient.getTODOs(userId);
-//        List<TODOItem> temp = new ArrayList<>();
+        if (status.equals("")) {
+            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.toLowerCase())).toList();
+        } else {
+            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.toLowerCase()) && todoItem.getStatus().equals(status)).toList();
+        }
+
 //        if (status.equals("")) {
-//            for (int i = 0; i < todos.length ; i++) {
-//                if (todos[i].getTitle().toLowerCase().contains(title.toLowerCase())) {
-//                    temp.add(todos[i]);
+//            for (int i = 0; i < todos.size() ; i++) {
+//                if (todos.get(i).getTitle().toLowerCase().contains(title.toLowerCase())) {
+//                    result.add(todos.get(i));
 //                }
 //            }
 //        } else {
-//            for (int i = 0; i < todos.length ; i++) {
-//                if (todos[i].getStatus().equals(status) && todos[i].getTitle().toLowerCase().contains(title.toLowerCase())) {
-//                    temp.add(todos[i]);
+//            for (int i = 0; i < todos.size() ; i++) {
+//                if (todos.get(i).getStatus().equals(status) && todos.get(i).getTitle().toLowerCase().contains(title.toLowerCase())) {
+//                    result.add(todos.get(i));
 //                }
 //            }
 //        }
-//        TODOItem[] result = new TODOItem[temp.size()];
-//        for (int i = 0; i < temp.size(); i++) {
-//            result[i] = temp.get(i);
-//        }
-//        return result;
+        return result;
     }
 
     public TODOItem getTODO(Long userId, Long id) {
