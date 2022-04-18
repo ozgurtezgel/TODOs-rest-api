@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -35,15 +36,19 @@ public class UserService {
         return userRestClient.createTODO(todo, todo.getUserId());
     }
 
-    public List<TODOItem> getTODOs(Long userId, String title, String status) {
+    public List<TODOItem> getTODOs(Long userId, Optional<String> title, Optional<String> status) {
         LOGGER.info("Get the TODO of the user with the id: {} matching the parameters title: {}, status: {}", userId, title, status);
         List<TODOItem> todos = userRestClient.getTODOs(userId);
         List<TODOItem> result = new ArrayList<>();
 
-        if (status.equals("")) {
-            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.toLowerCase())).toList();
+        if (status.isPresent() && title.isPresent()) {
+            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.get().toLowerCase()) && todoItem.getStatus().equals(status.get())).toList();
+        } else if (status.isPresent() && title.isEmpty()) {
+            result = todos.stream().filter(todoItem -> todoItem.getStatus().equals(status.get())).toList();
+        } else if (status.isEmpty() && title.isPresent()) {
+            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.get().toLowerCase())).toList();
         } else {
-            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.toLowerCase()) && todoItem.getStatus().equals(status)).toList();
+            return todos;
         }
 
 //        if (status.equals("")) {
