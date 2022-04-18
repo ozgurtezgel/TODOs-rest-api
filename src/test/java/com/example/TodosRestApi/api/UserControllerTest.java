@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -159,7 +160,7 @@ public class UserControllerTest {
         TODOItem fifthTODO = new TODOItem(-3L, userId, "Hobbies", "2023-02-20", "completed");
         TODOItem sixthTODO = new TODOItem(-3L, userId, "Job", "2024-05-06", "pending");
         List<TODOItem> todos = List.of(firstTODO, secondTODO, thirdTODO, fourthTODO, fifthTODO, sixthTODO);
-        when(userServiceMock.getTODOs(userId, "", "")).thenReturn(todos);
+        when(userServiceMock.getTODOs(userId, Optional.empty(), Optional.empty())).thenReturn(todos);
 
         // act & assert
         ResultActions result =
@@ -183,7 +184,7 @@ public class UserControllerTest {
         TODOItem fourthTODO = new TODOItem(-3L, userId, "Job Application", "2021-03-16", "completed");
         TODOItem sixthTODO = new TODOItem(-3L, userId, "Job", "2024-05-06", "pending");
         List<TODOItem> todos = List.of(fourthTODO, sixthTODO);
-        when(userServiceMock.getTODOs(userId, "job", "")).thenReturn(todos);
+        when(userServiceMock.getTODOs(userId, Optional.of("job"), Optional.empty())).thenReturn(todos);
 
         // act & assert
         ResultActions result =
@@ -199,7 +200,7 @@ public class UserControllerTest {
                         .andExpect(jsonPath("_embedded.tODOItemList[1].title", is(sixthTODO.getTitle())))
                         .andExpect(jsonPath("_embedded.tODOItemList[1].due_on", is(sixthTODO.getDue_on())))
                         .andExpect(jsonPath("_embedded.tODOItemList[1].status", is(sixthTODO.getStatus())));
-        verify(userServiceMock, times(1)).getTODOs(userId, "job", "");
+        verify(userServiceMock, times(1)).getTODOs(userId, Optional.of("job"), Optional.empty());
     }
 
     @Test
@@ -208,7 +209,7 @@ public class UserControllerTest {
         Long userId = -1L;
         TODOItem secondTODO = new TODOItem(-2L, userId, "Sport", "2022-06-30", "pending");
         List<TODOItem> todos = List.of(secondTODO);
-        when(userServiceMock.getTODOs(userId, "sport", "")).thenReturn(todos);
+        when(userServiceMock.getTODOs(userId, Optional.of("sport"), Optional.empty())).thenReturn(todos);
 
         // act & assert
         ResultActions result =
@@ -221,7 +222,7 @@ public class UserControllerTest {
                         .andExpect(jsonPath("_embedded.tODOItemList[0].title", is("Sport")))
                         .andExpect(jsonPath("_embedded.tODOItemList[0].due_on", is("2022-06-30")))
                         .andExpect(jsonPath("_embedded.tODOItemList[0].status", is("pending")));
-        verify(userServiceMock, times(1)).getTODOs(userId, "sport", "");
+        verify(userServiceMock, times(1)).getTODOs(userId, Optional.of("sport"), Optional.empty());
     }
 
     @Test
@@ -235,7 +236,7 @@ public class UserControllerTest {
         TODOItem fifthTODO = new TODOItem(-3L, userId, "Hobbies", "2023-02-20", "completed");
         TODOItem sixthTODO = new TODOItem(-3L, userId, "Job", "2024-05-06", "pending");
         List<TODOItem> todos = List.of(firstTODO, secondTODO, thirdTODO, fourthTODO, fifthTODO, sixthTODO);
-        when(userServiceMock.getTODOs(userId, "", "")).thenReturn(todos);
+        when(userServiceMock.getTODOs(userId, Optional.empty(), Optional.empty())).thenReturn(todos);
 
         // act & assert
         ResultActions result =
@@ -248,8 +249,8 @@ public class UserControllerTest {
                         .andExpect(jsonPath("_embedded.tODOItemList[0].title", is(firstTODO.getTitle())))
                         .andExpect(jsonPath("_embedded.tODOItemList[1].title", is(secondTODO.getTitle())))
                         .andExpect(jsonPath("_embedded.tODOItemList[2].title", is(thirdTODO.getTitle())))
-                        .andExpect(jsonPath("_links.next.href", is("http://localhost/users/-1/todos?title=&status=&pageSize=3&page=1")));
-        verify(userServiceMock, times(1)).getTODOs(userId, "", "");
+                        .andExpect(jsonPath("_links.next.href", is("http://localhost/users/-1/todos?pageSize=3&page=1")));
+        verify(userServiceMock, times(1)).getTODOs(userId, Optional.empty(), Optional.empty());
     }
 
     @Test
@@ -260,7 +261,7 @@ public class UserControllerTest {
         TODOItem fourthTODO = new TODOItem(-3L, userId, "Job Application", "2021-03-16", "completed");
         TODOItem fifthTODO = new TODOItem(-3L, userId, "Hobbies", "2023-02-20", "completed");
         List<TODOItem> todos = List.of(thirdTODO, fourthTODO, fifthTODO);
-        when(userServiceMock.getTODOs(userId, "", "completed")).thenReturn(todos);
+        when(userServiceMock.getTODOs(userId, Optional.empty(), Optional.of("completed"))).thenReturn(todos);
 
         // act & assert
         ResultActions result =
@@ -273,8 +274,8 @@ public class UserControllerTest {
                         .andExpect(jsonPath("_embedded.tODOItemList", hasSize(2)))
                         .andExpect(jsonPath("_embedded.tODOItemList[0].title", is(thirdTODO.getTitle())))
                         .andExpect(jsonPath("_embedded.tODOItemList[1].title", is(fourthTODO.getTitle())))
-                        .andExpect(jsonPath("_links.next.href", is("http://localhost/users/-1/todos?title=&status=completed&pageSize=2&page=1")));
-        verify(userServiceMock, times(1)).getTODOs(userId, "", "completed");
+                        .andExpect(jsonPath("_links.next.href", is("http://localhost/users/-1/todos?status=completed&pageSize=2&page=1")));
+        verify(userServiceMock, times(1)).getTODOs(userId, Optional.empty(), Optional.of("completed"));
     }
 
     @Test
@@ -288,7 +289,7 @@ public class UserControllerTest {
         TODOItem fifthTODO = new TODOItem(-3L, userId, "Hobbies", "2023-02-20", "completed");
         TODOItem sixthTODO = new TODOItem(-3L, userId, "Job", "2024-05-06", "pending");
         List<TODOItem> todos = List.of(firstTODO, secondTODO, thirdTODO, fourthTODO, fifthTODO, sixthTODO);
-        when(userServiceMock.getTODOs(userId, "", "")).thenReturn(todos);
+        when(userServiceMock.getTODOs(userId, Optional.empty(), Optional.empty())).thenReturn(todos);
 
         // act & assert
         ResultActions result =
@@ -301,7 +302,7 @@ public class UserControllerTest {
                         .andExpect(jsonPath("_embedded.tODOItemList", hasSize(2)))
                         .andExpect(jsonPath("_embedded.tODOItemList[0].title", is(thirdTODO.getTitle())))
                         .andExpect(jsonPath("_embedded.tODOItemList[1].title", is(fourthTODO.getTitle())))
-                        .andExpect(jsonPath("_links.next.href", is("http://localhost/users/-1/todos?title=&status=&pageSize=2&page=2")));
-        verify(userServiceMock, times(1)).getTODOs(userId, "", "");
+                        .andExpect(jsonPath("_links.next.href", is("http://localhost/users/-1/todos?pageSize=2&page=2")));
+        verify(userServiceMock, times(1)).getTODOs(userId, Optional.empty(), Optional.empty());
     }
 }

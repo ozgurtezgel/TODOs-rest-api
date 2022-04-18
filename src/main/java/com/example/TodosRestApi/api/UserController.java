@@ -19,8 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
@@ -68,22 +68,11 @@ public class UserController {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid client id or secret");
     }
 
-//    @GetMapping(path = "{id}/todos")
-//    @ResponseStatus(HttpStatus.OK)
-//    public List<TODOItem> getTODOs(@PathVariable("id") Long id, @RequestParam(required = false, value = "title", defaultValue = "") String title, @RequestParam(required = false, value = "status", defaultValue = "") String status,
-//                                   @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
-//
-//        if (clientId.equals(ID) && clientSecret.equals(secret)) {
-//            return userService.getTODOs(id, title, status);
-//        }
-//        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid client id or secret");
-//    }
-
     @GetMapping(path = "{id}/todos")
     @ResponseStatus(HttpStatus.OK)
-    public CollectionModel<TODOItem> getTODOs(@PathVariable("id") Long id, @RequestParam(required = false, value = "title", defaultValue = "") String title, @RequestParam(required = false, value = "status", defaultValue = "") String status,
-                                   @RequestParam(required = false, value = "pageSize", defaultValue = "20") Integer pageSize, @RequestParam(required = false, value = "page", defaultValue = "0") Integer page,
-                                   @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
+    public CollectionModel<TODOItem> getTODOs(@PathVariable("id") Long id, @RequestParam(required = false, value = "title") Optional<String> title, @RequestParam(required = false, value = "status") Optional<String> status,
+                                              @RequestParam(required = false, value = "pageSize", defaultValue = "20") Integer pageSize, @RequestParam(required = false, value = "page", defaultValue = "0") Integer page,
+                                              @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
 
         if (clientId.equals(ID) && clientSecret.equals(secret)) {
             List<TODOItem> todos = userService.getTODOs(id, title, status);
@@ -99,6 +88,7 @@ public class UserController {
                 result = CollectionModel.of(pageItem);
             } else {
                 Link nextLink = linkTo(methodOn(UserController.class).getTODOs(id, title, status, pageSize, page+1, clientId, clientSecret)).withRel("next");
+                nextLink = nextLink.expand();
                 Page<TODOItem> pageItem = new PageImpl<>(todos.subList(start, end), paging, todos.size());
                 result = CollectionModel.of(pageItem, nextLink);
             }
