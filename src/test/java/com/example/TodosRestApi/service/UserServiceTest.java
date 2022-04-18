@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -74,7 +75,7 @@ class UserServiceTest {
         when(userRestClientMock.getTODOs(userId)).thenReturn(todos);
 
         // act
-        List<TODOItem> response = userService.getTODOs(userId, "", "");
+        List<TODOItem> response = userService.getTODOs(userId, Optional.empty(), Optional.empty());
 
         // assert
         assertEquals(todos, response);
@@ -113,7 +114,7 @@ class UserServiceTest {
         when(userRestClientMock.getTODOs(userId)).thenReturn(todos);
 
         // act
-        List<TODOItem> response = userService.getTODOs(userId, "Spor", "pending");
+        List<TODOItem> response = userService.getTODOs(userId, Optional.of("Spor"), Optional.of("pending"));
 
         // assert
         assertEquals(response, expected);
@@ -133,7 +134,7 @@ class UserServiceTest {
         when(userRestClientMock.getTODOs(userId)).thenReturn(todos);
 
         // act
-        List<TODOItem> response = userService.getTODOs(userId, "Spor", "completed");
+        List<TODOItem> response = userService.getTODOs(userId, Optional.of("Spor"), Optional.of("completed"));
 
         // assert
         assertEquals(expected, response);
@@ -152,7 +153,7 @@ class UserServiceTest {
         when(userRestClientMock.getTODOs(userId)).thenReturn(todos);
 
         // act
-        List<TODOItem> response = userService.getTODOs(userId, "Sport", "");
+        List<TODOItem> response = userService.getTODOs(userId, Optional.of("Sport"), Optional.empty());
 
         // assert
         assertEquals(expected, response);
@@ -172,7 +173,7 @@ class UserServiceTest {
         when(userRestClientMock.getTODOs(userId)).thenReturn(todos);
 
         // act
-        List<TODOItem> response = userService.getTODOs(userId, "Sport", "");
+        List<TODOItem> response = userService.getTODOs(userId, Optional.of("Sport"), Optional.empty());
 
         // assert
         assertEquals(expected, response);
@@ -191,7 +192,7 @@ class UserServiceTest {
         when(userRestClientMock.getTODOs(userId)).thenReturn(todos);
 
         // act
-        List<TODOItem> response = userService.getTODOs(userId, "", "pending");
+        List<TODOItem> response = userService.getTODOs(userId, Optional.empty(), Optional.of("pending"));
 
         // assert
         assertEquals(expected, response);
