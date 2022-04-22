@@ -5,11 +5,13 @@ import com.example.TodosRestApi.model.TODOItem;
 import com.example.TodosRestApi.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class UserService {
@@ -41,29 +43,25 @@ public class UserService {
         List<TODOItem> todos = userRestClient.getTODOs(userId);
         List<TODOItem> result = new ArrayList<>();
 
-        if (status.isPresent() && title.isPresent()) {
-            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.get().toLowerCase()) && todoItem.getStatus().equals(status.get())).toList();
-        } else if (status.isPresent() && title.isEmpty()) {
-            result = todos.stream().filter(todoItem -> todoItem.getStatus().equals(status.get())).toList();
-        } else if (status.isEmpty() && title.isPresent()) {
-            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.get().toLowerCase())).toList();
-        } else {
-            return todos;
+        Stream<TODOItem> stream = todos.stream();
+        if (status.isPresent()) {
+            stream = stream.filter(todoItem -> todoItem.getStatus().equals(status.get()));
         }
+        if (title.isPresent()) {
+            stream = stream.filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.get().toLowerCase()));
+        }
+        result = stream.toList();
 
-//        if (status.equals("")) {
-//            for (int i = 0; i < todos.size() ; i++) {
-//                if (todos.get(i).getTitle().toLowerCase().contains(title.toLowerCase())) {
-//                    result.add(todos.get(i));
-//                }
-//            }
+//        if (status.isPresent() && title.isPresent()) {
+//            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.get().toLowerCase()) && todoItem.getStatus().equals(status.get())).toList();
+//        } else if (status.isPresent() && title.isEmpty()) {
+//            result = todos.stream().filter(todoItem -> todoItem.getStatus().equals(status.get())).toList();
+//        } else if (status.isEmpty() && title.isPresent()) {
+//            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.get().toLowerCase())).toList();
 //        } else {
-//            for (int i = 0; i < todos.size() ; i++) {
-//                if (todos.get(i).getStatus().equals(status) && todos.get(i).getTitle().toLowerCase().contains(title.toLowerCase())) {
-//                    result.add(todos.get(i));
-//                }
-//            }
+//            return todos;
 //        }
+
         return result;
     }
 
