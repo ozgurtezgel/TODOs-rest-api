@@ -64,9 +64,28 @@ public class WebApplicationTest {
     }
 
     @Test
-    public void shouldReturnStatusCode400WhenRegisteringUser() throws Exception {
+    public void shouldReturnStatusCode400WhenRegisteringUserWithInvalidGenderValue() throws Exception {
         // arrange
         User user = new User(-1L,"John", "jo@gmail.com", "mal", "active");
+        HttpHeaders headers = prepareHeaders();
+        HttpEntity<User> entity = new HttpEntity<>(user, headers);
+        when(restTemplateMock.exchange(REQUEST_URI, HttpMethod.POST, entity, User.class)).thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+
+        MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/users/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("clientId", ID)
+                .header("clientSecret", secret)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(this.mapper.writeValueAsString(user));
+
+        // act & assert
+        mockMvc.perform(mockRequest).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void shouldReturnStatusCode400WhenRegisteringUserWithInvalidStatusValue() throws Exception {
+        // arrange
+        User user = new User(-1L,"John", "jo@gmail.com", "male", "old member");
         HttpHeaders headers = prepareHeaders();
         HttpEntity<User> entity = new HttpEntity<>(user, headers);
         when(restTemplateMock.exchange(REQUEST_URI, HttpMethod.POST, entity, User.class)).thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
@@ -177,7 +196,7 @@ public class WebApplicationTest {
     }
 
     @Test
-    public void shouldGetSpecifiedTwoTODOsWithBothParameters() throws Exception {
+    public void shouldGetTwoTODOsFilteredWithTitleAndStatus() throws Exception {
         // arrange
         Long userId = -1L;
         TODOItem secondTODO = new TODOItem(-2L, userId, "CV for job", "2022-06-30", "completed");
@@ -205,7 +224,7 @@ public class WebApplicationTest {
     }
 
     @Test
-    public void shouldGetSpecifiedTODOWithTitle() throws Exception {
+    public void shouldGetSpecifiedTODOFilteredWithTitle() throws Exception {
         // arrange
         Long userId = -1L;
         TODOItem secondTODO = new TODOItem(-2L, userId, "CV for job", "2022-06-30", "completed");
@@ -233,7 +252,7 @@ public class WebApplicationTest {
     }
 
     @Test
-    public void shouldGetSpecifiedTODOWithStatus() throws Exception {
+    public void shouldGetSpecifiedTODOFilteredWithStatus() throws Exception {
         // arrange
         Long userId = -1L;
         TODOItem firstTODO = new TODOItem(-1L, userId, "Math Class", "2022-06-06", "pending");
@@ -255,6 +274,46 @@ public class WebApplicationTest {
                         .andExpect(jsonPath("_embedded.tODOItemList[0].status", is(firstTODO.getStatus())))
                         .andExpect(jsonPath("_embedded.tODOItemList[1].title", is(sixthTODO.getTitle())))
                         .andExpect(jsonPath("_embedded.tODOItemList[1].status", is(sixthTODO.getStatus())));
+    }
+
+    @Test
+    public void shouldThrowResponseStatusExceptionWhenCalledWithInvalidClientId() throws Exception {
+        // arrange
+        Long userId = -1L;
+        TODOItem firstTODO = new TODOItem(-1L, userId, "Math Class", "2022-06-06", "pending");
+        TODOItem sixthTODO = new TODOItem(-3L, userId, "Job", "2024-05-06", "pending");
+        TODOItem[] todos = {firstTODO, sixthTODO};
+        HttpHeaders headers = prepareHeaders();
+        HttpEntity<String> entity = new HttpEntity<>("body", headers);
+        when(restTemplateMock.exchange(REQUEST_URI + "/" + userId + "/todos", HttpMethod.GET, entity, TODOItem[].class)).thenReturn(new ResponseEntity<>(todos, HttpStatus.OK));
+
+        // act & assert
+        ResultActions result =
+                mockMvc.perform(get("/users/-1/todos").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", "182AJM83MA840HV")
+                                .header("clientSecret", secret)
+                                .param("status", "pending"))
+                        .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void shouldThrowResponseStatusExceptionWhenCalledWithInvalidClientSecret() throws Exception {
+        // arrange
+        Long userId = -1L;
+        TODOItem firstTODO = new TODOItem(-1L, userId, "Math Class", "2022-06-06", "pending");
+        TODOItem sixthTODO = new TODOItem(-3L, userId, "Job", "2024-05-06", "pending");
+        TODOItem[] todos = {firstTODO, sixthTODO};
+        HttpHeaders headers = prepareHeaders();
+        HttpEntity<String> entity = new HttpEntity<>("body", headers);
+        when(restTemplateMock.exchange(REQUEST_URI + "/" + userId + "/todos", HttpMethod.GET, entity, TODOItem[].class)).thenReturn(new ResponseEntity<>(todos, HttpStatus.OK));
+
+        // act & assert
+        ResultActions result =
+                mockMvc.perform(get("/users/-1/todos").contentType(MediaType.APPLICATION_JSON)
+                                .header("clientId", ID)
+                                .header("clientSecret", "182AJM83MA840HV")
+                                .param("status", "pending"))
+                        .andExpect(status().isUnauthorized());
     }
 
     public HttpHeaders prepareHeaders() {
