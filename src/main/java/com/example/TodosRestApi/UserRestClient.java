@@ -41,7 +41,6 @@ public class UserRestClient {
     }
 
     public void deleteUserByID(Long id) {
-
         HttpHeaders headers = prepareHeader();
         HttpEntity<?> entity = new HttpEntity<>(headers);
         ResponseEntity<Void> responseEntity = restTemplate.exchange(REQUEST_URI + "/" + id, HttpMethod.DELETE, entity, Void.class);
