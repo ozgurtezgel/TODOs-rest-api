@@ -5,6 +5,8 @@ import com.example.TodosRestApi.model.TODOItem;
 import com.example.TodosRestApi.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ public class UserService {
         return userRestClient.createTODO(todo, todo.getUserId());
     }
 
+    @Cacheable(cacheNames = {"todoCache"}, key = "#userId.toString() + #title.toString() + #status.toString()")
     public List<TODOItem> getTODOs(Long userId, Optional<String> title, Optional<String> status) {
         LOGGER.info("Get the TODO of the user with the id: {} matching the parameters title: {}, status: {}", userId, title, status);
         List<TODOItem> todos = userRestClient.getTODOs(userId);
@@ -51,20 +54,10 @@ public class UserService {
             stream = stream.filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.get().toLowerCase()));
         }
         result = stream.toList();
-
-//        if (status.isPresent() && title.isPresent()) {
-//            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.get().toLowerCase()) && todoItem.getStatus().equals(status.get())).toList();
-//        } else if (status.isPresent() && title.isEmpty()) {
-//            result = todos.stream().filter(todoItem -> todoItem.getStatus().equals(status.get())).toList();
-//        } else if (status.isEmpty() && title.isPresent()) {
-//            result = todos.stream().filter(todoItem -> todoItem.getTitle().toLowerCase().contains(title.get().toLowerCase())).toList();
-//        } else {
-//            return todos;
-//        }
-
         return result;
     }
 
+    @Cacheable(cacheNames = {"todoCache"}, key = "#userId.toString() + #id.toString()")
     public TODOItem getTODO(Long userId, Long id) {
         LOGGER.info("Get the TODO with the id: {} of the User with the id: {}", id, userId);
         List<TODOItem> todos = userRestClient.getTODOs(userId);
