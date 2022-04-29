@@ -4,6 +4,7 @@ import com.example.TodosRestApi.model.TODOItem;
 import com.example.TodosRestApi.model.User;
 import com.example.TodosRestApi.service.UserService;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.data.domain.Page;
@@ -70,6 +71,7 @@ public class UserController {
 
     @GetMapping(path = "{id}/todos")
     @ResponseStatus(HttpStatus.OK)
+    @Retry(name = "todoSearch")
     public CollectionModel<TODOItem> getTODOs(@PathVariable("id") Long id, @RequestParam(required = false, value = "title") Optional<String> title, @RequestParam(required = false, value = "status") Optional<String> status,
                                               @RequestParam(required = false, value = "pageSize", defaultValue = "20") Integer pageSize, @RequestParam(required = false, value = "page", defaultValue = "0") Integer page,
                                               @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
@@ -99,6 +101,7 @@ public class UserController {
 
     @GetMapping(path = "{userId}/{id}/todo")
     @ResponseStatus(HttpStatus.OK)
+    @Retry(name = "todoSearch")
     public TODOItem getTODO(@PathVariable("userId") Long userId, @PathVariable("id") Long id, @RequestHeader(value = "clientId") String clientId, @RequestHeader(value = "clientSecret") String clientSecret) {
         if (clientId.equals(ID) && clientSecret.equals(secret)) {
             return userService.getTODO(userId, id);
