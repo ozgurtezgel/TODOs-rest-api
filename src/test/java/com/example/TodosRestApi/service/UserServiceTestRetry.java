@@ -38,7 +38,7 @@ public class UserServiceTestRetry {
 
 
     @Test
-    public void threeTimes() throws Exception {
+    public void tryGettingTodosThreeTimesWhenFailed() throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + accessToken);
