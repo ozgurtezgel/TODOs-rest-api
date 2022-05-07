@@ -44,7 +44,7 @@ public class UserService {
     public List<TODOItem> getTODOs(Long userId, Optional<String> title, Optional<String> status) {
         LOGGER.info("Get the TODO of the user with the id: {} matching the parameters title: {}, status: {}", userId, title, status);
         List<TODOItem> todos = userRestClient.getTODOs(userId);
-        List<TODOItem> result = new ArrayList<>();
+        List<TODOItem> result;
 
         Stream<TODOItem> stream = todos.stream();
         if (status.isPresent()) {
