@@ -22,7 +22,6 @@ class UserServiceTest {
     private UserService userService;
     @Mock
     private UserRestClient userRestClientMock;
-    private static final String accessToken = "4140ef1db63d80c58651e1de7843aaa812f2470c7319be9e053bcd46578267e8";
 
     @Test
     public void shouldRegisterUserSuccessfully() {
